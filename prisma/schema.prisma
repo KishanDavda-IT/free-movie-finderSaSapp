@@ -1,0 +1,50 @@
+// Prisma schema for FreeMovieFinder
+// Documentation: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// A movie record sourced from TMDB.
+// `tmdbId` is unique so the seed script can be re-run safely (upsert).
+model Movie {
+  id          String   @id @default(cuid())
+  tmdbId      Int      @unique
+  title       String
+  description String
+  posterUrl   String
+  releaseYear Int
+  category    String   @default("Featured")
+  // watchUrl is the embeddable URL of the FULL movie (not the trailer).
+  // For public-domain films this is an Internet Archive embed URL
+  // (https://archive.org/embed/{id}). For non-PD films this is null and
+  // the Watch modal falls back to a "streaming partners" grid of real,
+  // working outbound links.
+  watchUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // One movie can have many streaming sources across free platforms.
+  sources Source[]
+}
+
+// A free streaming source for a given movie (Tubi, Pluto TV, YouTube, Plex, Crackle).
+// `isFree` lets us later mix in paid sources without breaking the UI filter.
+model Source {
+  id           String   @id @default(cuid())
+  movieId      String
+  platformName String
+  url          String
+  isFree       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@index([movieId])
+}
