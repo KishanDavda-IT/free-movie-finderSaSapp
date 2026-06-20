@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
 
 const UA =
   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
@@ -32,6 +31,8 @@ export async function GET(req: NextRequest) {
   try {
     const limitParam = req.nextUrl.searchParams.get("limit") || "5";
     const limit = Math.min(Math.max(parseInt(limitParam, 10) || 5, 1), 15); // process 1-15 candidates per sync run to prevent timeouts
+
+    const { db } = await import("@/lib/db");
 
     // 1. Get the lowest synthetic tmdbId
     const lowestMovie = await db.movie.findFirst({

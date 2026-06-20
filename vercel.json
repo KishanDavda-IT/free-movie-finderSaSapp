@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npx tsx scripts/build-data.ts && next build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next"
+}
